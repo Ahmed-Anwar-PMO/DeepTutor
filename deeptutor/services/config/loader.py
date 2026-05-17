@@ -179,12 +179,13 @@ def parse_language(language: Any) -> str:
     Supported language representations:
     - English: "en", "english", "English"
     - Chinese: "zh", "chinese", "Chinese"
+    - Arabic: "ar", "arabic", "العربية"
 
     Args:
         language: Language configuration value (can be "zh"/"en"/"Chinese"/"English" etc.)
 
     Returns:
-        Standardized language code: 'zh' or 'en', defaults to 'zh'
+        Standardized language code: 'zh', 'en', or 'ar', defaults to 'zh'
     """
     if not language:
         return "zh"
@@ -195,6 +196,10 @@ def parse_language(language: Any) -> str:
             return "en"
         if lang_lower in ["zh", "chinese", "cn"]:
             return "zh"
+        if lang_lower in ["ar", "ara", "arabic", "العربية"] or lang_lower.startswith(
+            ("ar-", "ar_")
+        ):
+            return "ar"
 
     return "zh"  # Default Chinese
 

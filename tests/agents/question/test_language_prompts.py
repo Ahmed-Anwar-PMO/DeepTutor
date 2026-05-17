@@ -97,6 +97,23 @@ async def test_idea_agent_appends_language_directive_to_system_prompt() -> None:
 
 
 @pytest.mark.asyncio
+async def test_idea_agent_appends_arabic_language_directive_to_system_prompt() -> None:
+    agent = CaptureIdeaAgent(language="ar")
+
+    templates = await agent._generate_templates(
+        user_topic="الجبر الخطي",
+        preference="اكتب بالعربية",
+        knowledge_context="المصفوفات والفضاءات المتجهة",
+        num_ideas=1,
+    )
+
+    assert templates
+    assert agent.captured_system_prompts
+    assert "Idea agent system" in agent.captured_system_prompts[0]
+    assert "اللغة العربية الفصحى" in agent.captured_system_prompts[0]
+
+
+@pytest.mark.asyncio
 async def test_generator_appends_language_directive_to_generate_and_repair_prompts() -> None:
     agent = CaptureGenerator(language="zh")
     template = QuestionTemplate(

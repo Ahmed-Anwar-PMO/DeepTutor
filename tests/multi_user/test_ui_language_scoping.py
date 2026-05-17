@@ -36,3 +36,14 @@ def test_get_ui_language_defaults_when_no_file(mu_isolated_root, as_user):
     with as_user("u_alice", role="user"):
         # Bob has nothing on disk yet — falls back to the default "en".
         assert get_ui_language() == "en"
+
+
+def test_get_ui_language_accepts_arabic(mu_isolated_root, as_user):
+    alice_settings = (
+        mu_isolated_root / "multi-user" / "u_alice" / "user" / "settings" / "interface.json"
+    )
+    alice_settings.parent.mkdir(parents=True, exist_ok=True)
+    alice_settings.write_text(json.dumps({"theme": "dark", "language": "ar"}))
+
+    with as_user("u_alice", role="user"):
+        assert get_ui_language() == "ar"

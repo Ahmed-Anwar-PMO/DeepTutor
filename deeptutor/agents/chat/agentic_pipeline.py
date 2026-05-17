@@ -34,7 +34,7 @@ from deeptutor.services.llm import (
     stream as llm_stream,
 )
 from deeptutor.services.prompt import get_prompt_manager
-from deeptutor.services.prompt.language import append_language_directive
+from deeptutor.services.prompt.language import append_language_directive, normalize_language
 from deeptutor.tools.builtin import BUILTIN_TOOL_NAMES
 from deeptutor.utils.json_parser import parse_json_response
 
@@ -106,7 +106,7 @@ class AgenticChatPipeline:
     """Run chat as a 4-stage agentic pipeline."""
 
     def __init__(self, language: str = "en") -> None:
-        self.language = "zh" if language.lower().startswith("zh") else "en"
+        self.language = normalize_language(language)
         self.llm_config = get_llm_config()
         self.binding = getattr(self.llm_config, "binding", None) or "openai"
         self.model = getattr(self.llm_config, "model", None)
@@ -1374,6 +1374,12 @@ class AgenticChatPipeline:
                 "本轮已有系统态选中的知识库。如果需要知识库检索，只需调用 RAG 并提供非空 query；"
                 "不要输出、猜测或沿用任何知识库名称，也不要传 kb_name。系统会把 query 发到当前选中的知识库。"
             )
+        if getattr(self, "language", "en").startswith("ar"):
+            return (
+                "توجد قاعدة معرفة محددة في حالة النظام لهذه الجولة. إذا كان الاسترجاع مفيدا، "
+                "استدع RAG مع query غير فارغ فقط؛ لا تكتب اسم قاعدة المعرفة ولا تخمنه ولا تعيد "
+                "استخدامه ولا تمرر kb_name. سيقوم النظام بتوجيه الاستعلام إلى قاعدة المعرفة المحددة."
+            )
         return (
             "A knowledge base is selected in system state for this turn. "
             "If retrieval is useful, call RAG with only a non-empty query; do not output, "
@@ -1384,6 +1390,11 @@ class AgenticChatPipeline:
     def _rag_without_kb_message(self) -> str:
         if getattr(self, "language", "en") == "zh":
             return "已启用 RAG，但当前没有选择知识库；本轮将跳过知识库检索。"
+        if getattr(self, "language", "en").startswith("ar"):
+            return (
+                "تم تفعيل RAG، لكن لم يتم تحديد قاعدة معرفة حاليا؛ "
+                "سيتم تخطي استرجاع قاعدة المعرفة في هذه الجولة."
+            )
         return (
             "RAG is enabled, but no knowledge base is selected; "
             "skipping KB retrieval for this turn."
@@ -1427,7 +1438,11 @@ class AgenticChatPipeline:
         )
 
     def _fallback_empty_tool_list(self) -> str:
-        return "- 无" if self.language == "zh" else "- none"
+        if self.language == "zh":
+            return "- 无"
+        if self.language.startswith("ar"):
+            return "- لا توجد"
+        return "- none"
 
     def _format_tool_traces(self, tool_traces: list[ToolTrace]) -> str:
         if not tool_traces:
@@ -1503,6 +1518,8 @@ class AgenticChatPipeline:
         return f"[{label}]\n{content.strip() if content.strip() else '(empty)'}"
 
     def _text(self, *, zh: str, en: str) -> str:
+        if self.language.startswith("ar"):
+            return en
         return zh if self.language == "zh" else en
 
     def _t(self, key: str, default: str = "", **kwargs: Any) -> str:

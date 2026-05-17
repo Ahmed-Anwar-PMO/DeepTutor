@@ -5,6 +5,8 @@ import i18n from "i18next";
 
 import { initI18n, normalizeLanguage, type AppLanguage } from "./init";
 
+const RTL_LANGUAGES = new Set<AppLanguage>(["ar"]);
+
 // Initialize i18next at module load (before any React render) so that the
 // `init()` call — which fires `initialized` / `languageChanged` events that
 // trigger setState on subscribed components — never happens during another
@@ -30,6 +32,7 @@ export function I18nProvider({
     // Keep <html lang="..."> in sync for accessibility & Intl defaults
     if (typeof document !== "undefined") {
       document.documentElement.lang = nextLang;
+      document.documentElement.dir = RTL_LANGUAGES.has(nextLang) ? "rtl" : "ltr";
     }
   }, [language]);
 

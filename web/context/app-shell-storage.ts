@@ -1,6 +1,6 @@
 "use client";
 
-export type AppLanguage = "en" | "zh";
+export type AppLanguage = "en" | "zh" | "ar";
 
 export const ACTIVE_SESSION_STORAGE_KEY = "deeptutor.activeSessionId.tab";
 export const LANGUAGE_STORAGE_KEY = "deeptutor-language";
@@ -13,7 +13,18 @@ export const SIDEBAR_COLLAPSED_EVENT = "deeptutor:sidebar-collapsed";
 export function normalizeLanguage(
   value: string | null | undefined,
 ): AppLanguage {
-  return value === "zh" ? "zh" : "en";
+  const language = String(value || "").trim().toLowerCase();
+  if (language === "zh" || language === "cn" || language === "chinese") return "zh";
+  if (
+    language === "ar" ||
+    language === "ara" ||
+    language === "arabic" ||
+    language === "العربية" ||
+    language.startsWith("ar-") ||
+    language.startsWith("ar_")
+  )
+    return "ar";
+  return "en";
 }
 
 export function readStoredLanguage(): AppLanguage {

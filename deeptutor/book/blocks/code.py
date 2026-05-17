@@ -32,7 +32,7 @@ class CodeGenerator(BlockGenerator):
         intent = str(params.get("intent") or "demonstrate")
 
         prompts = load_book_prompts("code", ctx.language)
-        none_label = "(无)" if ctx.language == "zh" else "(none)"
+        none_label = "(无)" if ctx.language == "zh" else "(لا يوجد)" if ctx.language.startswith("ar") else "(none)"
         user_prompt = get_book_prompt(prompts, "user_template").format(
             chapter_title=chapter_title,
             chapter_summary=chapter_summary or none_label,

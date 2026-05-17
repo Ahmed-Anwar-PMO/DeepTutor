@@ -20,6 +20,9 @@ _LANGUAGE_LABELS: dict[str, str] = {
     "ru": "Русский",
     "pt": "Português",
     "it": "Italiano",
+    "ar": "العربية",
+    "ar-sa": "العربية",
+    "arabic": "العربية",
 }
 
 
@@ -55,6 +58,16 @@ def language_directive(language: str | None) -> str:
             "JSON keys, or examples in this prompt are in another language. "
             "Keep proper nouns (people, products, formula symbols) in their "
             "original form."
+        )
+    if code.startswith("ar"):
+        return (
+            "\n\n[Language] اكتب كل النصوص الموجهة للقارئ باللغة العربية الفصحى "
+            "بشكل صارم، بما في ذلك العناوين والشرح والتلميحات والانتقالات "
+            "ونصوص الأسئلة والاختيارات. لا تنتقل إلى الإنجليزية أو أي لغة أخرى "
+            "حتى لو كانت المراجع أو مفاتيح JSON أو الأمثلة في هذه المطالبة "
+            "بلغة مختلفة. اكتب باتجاه عربي طبيعي من اليمين إلى اليسار، واستخدم "
+            "مصطلحات عربية واضحة مع إبقاء أسماء الأعلام والمنتجات والرموز "
+            "والصيغ الرياضية وأسماء الملفات كما هي عند الحاجة."
         )
     return (
         f"\n\n[Language] Write ALL reader-facing text strictly in {label}. "

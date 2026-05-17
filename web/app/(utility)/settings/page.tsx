@@ -23,13 +23,24 @@ import {
 
 import { useTranslation } from "react-i18next";
 
-import { writeStoredLanguage } from "@/context/app-shell-storage";
+import {
+  writeStoredLanguage,
+  type AppLanguage,
+} from "@/context/app-shell-storage";
 import { ModelAccessSummary } from "@/features/multi-user/components/ModelAccessSummary";
 import type { ModelAccess } from "@/features/multi-user/types";
 import { apiFetch, apiUrl } from "@/lib/api";
 import { setTheme as applyThemePreference } from "@/lib/theme";
 
 type ServiceName = "llm" | "embedding" | "search";
+
+const LANGUAGE_OPTIONS: readonly AppLanguage[] = ["en", "zh", "ar"];
+
+function languageLabelKey(language: AppLanguage): string {
+  if (language === "zh") return "language.chinese";
+  if (language === "ar") return "language.arabic";
+  return "language.english";
+}
 
 type CatalogModel = {
   id: string;
@@ -76,7 +87,7 @@ type Catalog = {
 
 type UiSettings = {
   theme: "light" | "dark" | "glass" | "snow";
-  language: "en" | "zh";
+  language: AppLanguage;
 };
 
 type ProviderOption = {
@@ -237,12 +248,14 @@ function formatContextWindowSource(
 
 function formatContextWindowUpdatedAt(
   value: string | undefined,
-  language: "en" | "zh",
+  language: AppLanguage,
 ): string {
   if (!value) return "";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return value;
-  return parsed.toLocaleString(language === "zh" ? "zh-CN" : "en-US", {
+  const locale =
+    language === "zh" ? "zh-CN" : language === "ar" ? "ar-SA" : "en-US";
+  return parsed.toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   });
@@ -588,7 +601,7 @@ function SettingsPageContent() {
   const [theme, setTheme] = useState<"light" | "dark" | "glass" | "snow">(
     "light",
   );
-  const [language, setLanguage] = useState<"en" | "zh">("en");
+  const [language, setLanguage] = useState<AppLanguage>("en");
   const [catalog, setCatalog] = useState<Catalog>(defaultCatalog());
   const [draft, setDraft] = useState<Catalog>(defaultCatalog());
   const [modelAccess, setModelAccess] = useState<ModelAccess | null>(null);
@@ -712,11 +725,10 @@ function SettingsPageContent() {
     !String(activeProfile?.api_key || "").trim();
 
   // Category-label typography. English looks great with `uppercase` + wide
-  // letter-spacing, but CJK glyphs are already square blocks — extra tracking
-  // pushes them apart and `uppercase` is a no-op. For zh we drop both and
-  // bump size by ~1px to keep visual weight comparable.
+  // letter-spacing, but CJK and RTL scripts read better without artificial
+  // tracking/uppercase treatment.
   const labelClass = (size: "sm" | "md" | "lg"): string => {
-    if (language === "zh") {
+    if (language === "zh" || language === "ar") {
       if (size === "sm") return "text-[10.5px] font-medium";
       if (size === "lg") return "text-[12px] font-medium";
       return "text-[11px] font-medium";
@@ -735,7 +747,7 @@ function SettingsPageContent() {
 
   const persistUi = async (
     nextTheme: "light" | "dark" | "glass" | "snow",
-    nextLanguage: "en" | "zh",
+    nextLanguage: AppLanguage,
   ) => {
     await apiFetch(apiUrl("/api/v1/settings/ui"), {
       method: "PUT",
@@ -752,7 +764,7 @@ function SettingsPageContent() {
     await persistUi(nextTheme, language);
   };
 
-  const updateLanguage = async (nextLanguage: "en" | "zh") => {
+  const updateLanguage = async (nextLanguage: AppLanguage) => {
     setLanguage(nextLanguage);
     writeStoredLanguage(nextLanguage);
     await persistUi(theme, nextLanguage);
@@ -1141,7 +1153,7 @@ function SettingsPageContent() {
               {t("Language")}
             </span>
             <div className="flex gap-0.5 rounded-lg bg-[var(--muted)] p-0.5">
-              {(["en", "zh"] as const).map((v) => (
+              {LANGUAGE_OPTIONS.map((v) => (
                 <button
                   key={v}
                   onClick={() => updateLanguage(v)}
@@ -1151,7 +1163,7 @@ function SettingsPageContent() {
                       : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                   }`}
                 >
-                  {v === "en" ? t("language.english") : t("language.chinese")}
+                  {t(languageLabelKey(v))}
                 </button>
               ))}
             </div>
@@ -1215,10 +1227,16 @@ function SettingsPageContent() {
                     if (!ts) return "—";
                     const parsed = new Date(ts);
                     if (Number.isNaN(parsed.getTime())) return "";
-                    return parsed.toLocaleTimeString(
-                      language === "zh" ? "zh-CN" : "en-US",
-                      { hour: "2-digit", minute: "2-digit" },
-                    );
+                    const locale =
+                      language === "zh"
+                        ? "zh-CN"
+                        : language === "ar"
+                          ? "ar-SA"
+                          : "en-US";
+                    return parsed.toLocaleTimeString(locale, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
                   })()}
                 </div>
               </div>

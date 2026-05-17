@@ -53,6 +53,8 @@ def _normalize_language(value: Any) -> str | None:
         return "en"
     if language in {"zh", "cn", "chinese"} or language.startswith("zh_"):
         return "zh"
+    if language in {"ar", "ara", "arabic", "العربية"} or language.startswith(("ar_", "ar-")):
+        return "ar"
     return None
 
 

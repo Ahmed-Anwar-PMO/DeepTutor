@@ -29,7 +29,7 @@ class FlashCardsGenerator(BlockGenerator):
         count = max(3, min(8, int(params.get("count") or 5)))
 
         prompts = load_book_prompts("flash_cards", ctx.language)
-        none_label = "(无)" if ctx.language == "zh" else "(none)"
+        none_label = "(无)" if ctx.language == "zh" else "(لا يوجد)" if ctx.language.startswith("ar") else "(none)"
         system_prompt = get_book_prompt(prompts, "system_template").format(count=count)
         user_prompt = get_book_prompt(prompts, "user_template").format(
             chapter_title=chapter_title,

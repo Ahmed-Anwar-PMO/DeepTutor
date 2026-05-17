@@ -13,10 +13,10 @@ from ._prompts import get_book_prompt, load_book_prompts
 from .base import BlockContext, BlockGenerator
 
 _VARIANT_LABELS = {
-    "key_idea": ("Key Idea", "核心要点"),
-    "common_pitfall": ("Watch Out", "常见误区"),
-    "summary": ("Summary", "小结"),
-    "tip": ("Tip", "小提示"),
+    "key_idea": ("Key Idea", "核心要点", "فكرة رئيسية"),
+    "common_pitfall": ("Watch Out", "常见误区", "انتبه"),
+    "summary": ("Summary", "小结", "ملخص"),
+    "tip": ("Tip", "小提示", "نصيحة"),
 }
 
 
@@ -29,14 +29,14 @@ class CalloutGenerator(BlockGenerator):
         params = ctx.block.params
         variant = str(params.get("variant") or "key_idea")
         labels = _VARIANT_LABELS.get(variant, _VARIANT_LABELS["key_idea"])
-        label = labels[1] if ctx.language == "zh" else labels[0]
+        label = labels[1] if ctx.language == "zh" else labels[2] if ctx.language.startswith("ar") else labels[0]
 
         chapter_title = params.get("chapter_title", ctx.chapter.title)
         chapter_summary = params.get("chapter_summary", ctx.chapter.summary)
         objectives = params.get("objectives") or ctx.chapter.learning_objectives
 
         prompts = load_book_prompts("callout", ctx.language)
-        none_label = "(无)" if ctx.language == "zh" else "(none)"
+        none_label = "(无)" if ctx.language == "zh" else "(لا يوجد)" if ctx.language.startswith("ar") else "(none)"
         user_prompt = get_book_prompt(prompts, "user_template").format(
             chapter_title=chapter_title,
             chapter_summary=chapter_summary or none_label,

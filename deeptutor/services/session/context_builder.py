@@ -269,6 +269,12 @@ class ContextBuilder:
                 "你负责把对话历史压缩成后续轮次可直接使用的上下文。保留用户目标、约束、已做决定、"
                 "未解决问题，以及能力切换带来的关键信息。总结要忠实、紧凑，不要虚构。"
             )
+        elif language.startswith("ar"):
+            system_prompt = (
+                "أنت تضغط سجل المحادثة إلى سياق يمكن استخدامه مباشرة في الجولات اللاحقة. "
+                "احتفظ بأهداف المستخدم وقيوده والقرارات المتخذة والأسئلة المفتوحة وأي معلومات "
+                "مهمة ناتجة عن تبديل القدرات. اجعل الملخص موجزا وأمينا ولا تخترع معلومات."
+            )
         user_prompt = (
             f"Compress the following conversation history into <= {summary_budget} tokens.\n\n"
             f"{source_text}"
@@ -277,6 +283,12 @@ class ContextBuilder:
             user_prompt = (
                 f"请把下面的对话历史压缩到不超过 {summary_budget} tokens 的长度，"
                 "供后续对话直接继承上下文。\n\n"
+                f"{source_text}"
+            )
+        elif language.startswith("ar"):
+            user_prompt = (
+                f"اضغط سجل المحادثة التالي إلى ما لا يزيد عن {summary_budget} tokens "
+                "ليستخدم كسياق مباشر في الجولات اللاحقة.\n\n"
                 f"{source_text}"
             )
         try:

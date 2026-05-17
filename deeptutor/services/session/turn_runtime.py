@@ -257,7 +257,8 @@ def _format_followup_question_context(context: dict[str, Any], language: str = "
         "correct" if correctness is True else "incorrect" if correctness is False else "unknown"
     )
 
-    if str(language or "en").lower().startswith("zh"):
+    lang = str(language or "en").lower()
+    if lang.startswith("zh"):
         lines = [
             "你正在处理一道测验题的后续追问。",
             "下面是本题上下文，请在后续回答中优先围绕这道题进行解释、纠错、延展和追问。",
@@ -291,6 +292,48 @@ def _format_followup_question_context(context: dict[str, Any], language: str = "
                 [
                     "",
                     "Knowledge context:",
+                    context["knowledge_context"],
+                ]
+            )
+        return "\n".join(lines).strip()
+
+    if lang.startswith("ar"):
+        correctness_text_ar = (
+            "صحيحة" if correctness is True else "غير صحيحة" if correctness is False else "غير معروف"
+        )
+        lines = [
+            "أنت تتعامل مع أسئلة متابعة حول عنصر اختبار واحد.",
+            "استخدم سياق السؤال أدناه بوصفه المرجع الأساسي للجولات القادمة في هذه الجلسة.",
+            "إذا سأل المستخدم عن موضوع أوسع، يمكنك الإجابة بشكل طبيعي مع الحفاظ على اتصال الإجابة بهذا السؤال.",
+            "",
+            "[سياق متابعة السؤال]",
+            f"معرف السؤال: {context.get('question_id') or '(لا يوجد)'}",
+            f"جلسة الاختبار الأصلية: {context.get('parent_quiz_session_id') or '(لا يوجد)'}",
+            f"نوع السؤال: {context.get('question_type') or '(لا يوجد)'}",
+            f"الصعوبة: {context.get('difficulty') or '(لا يوجد)'}",
+            f"التركيز: {context.get('concentration') or '(لا يوجد)'}",
+            "",
+            "السؤال:",
+            context.get("question") or "(لا يوجد)",
+        ]
+        if option_lines:
+            lines.extend(["", "الخيارات:", *option_lines])
+        lines.extend(
+            [
+                "",
+                f"إجابة المستخدم: {context.get('user_answer') or '(غير مقدمة)'}",
+                f"نتيجة المستخدم: {correctness_text_ar}",
+                f"الإجابة المرجعية: {context.get('correct_answer') or '(لا يوجد)'}",
+                "",
+                "الشرح:",
+                context.get("explanation") or "(لا يوجد)",
+            ]
+        )
+        if context.get("knowledge_context"):
+            lines.extend(
+                [
+                    "",
+                    "سياق المعرفة:",
                     context["knowledge_context"],
                 ]
             )

@@ -237,7 +237,7 @@ def _architect_user_prompt(
     exploration_summary: str,
     user_template: str,
 ) -> str:
-    none_label = "(无)" if language == "zh" else "(none)"
+    none_label = "(无)" if language == "zh" else "(لا يوجد)" if language.startswith("ar") else "(none)"
     objs = "\n".join(f"- {o}" for o in chapter.learning_objectives) or none_label
     return user_template.format(
         chapter_title=chapter.title,

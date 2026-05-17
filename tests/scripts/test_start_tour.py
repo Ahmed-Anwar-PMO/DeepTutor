@@ -202,6 +202,16 @@ def test_save_ui_language_preserves_existing_theme(tmp_path: Path) -> None:
     assert '"language": "zh"' in saved
 
 
+def test_save_ui_language_accepts_arabic(tmp_path: Path) -> None:
+    start_tour = _load_start_tour_module()
+    settings_path = tmp_path / "interface.json"
+
+    start_tour._save_ui_language("ar", path=settings_path)
+
+    saved = settings_path.read_text(encoding="utf-8")
+    assert '"language": "ar"' in saved
+
+
 def test_embedding_model_suggestions_include_gemini() -> None:
     start_tour = _load_start_tour_module()
     assert start_tour.EMBEDDING_MODEL_SUGGESTIONS["gemini"] == "gemini-embedding-001"

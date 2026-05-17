@@ -2,14 +2,24 @@ import i18n, { type Resource } from "i18next";
 import { initReactI18next } from "react-i18next";
 
 import enApp from "@/locales/en/app.json";
+import arApp from "@/locales/ar/app.json";
 import zhApp from "@/locales/zh/app.json";
 
-export type AppLanguage = "en" | "zh";
+export type AppLanguage = "en" | "zh" | "ar";
 
 export function normalizeLanguage(lang: unknown): AppLanguage {
   if (!lang) return "en";
-  const s = String(lang).toLowerCase();
+  const s = String(lang).trim().toLowerCase();
   if (s === "zh" || s === "cn" || s === "chinese") return "zh";
+  if (
+    s === "ar" ||
+    s === "ara" ||
+    s === "arabic" ||
+    s === "العربية" ||
+    s.startsWith("ar-") ||
+    s.startsWith("ar_")
+  )
+    return "ar";
   return "en";
 }
 
@@ -20,6 +30,7 @@ export function initI18n(language?: unknown) {
 
   const resources: Resource = {
     en: { app: enApp },
+    ar: { app: arApp },
     zh: { app: zhApp },
   };
 

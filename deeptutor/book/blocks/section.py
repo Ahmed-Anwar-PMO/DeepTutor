@@ -45,7 +45,11 @@ def _clip(text: str, limit: int) -> str:
 
 
 def _none_label(language: str) -> str:
-    return "(无)" if language == "zh" else "(none)"
+    if language == "zh":
+        return "(无)"
+    if language.startswith("ar"):
+        return "(لا يوجد)"
+    return "(none)"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -273,7 +277,13 @@ class SectionGenerator(BlockGenerator):
 
         prompts = load_book_prompts("section", ctx.language)
         none_label = _none_label(ctx.language)
-        same_as_heading = "(同标题)" if ctx.language == "zh" else "(same as heading)"
+        same_as_heading = (
+            "(同标题)"
+            if ctx.language == "zh"
+            else "(مثل العنوان)"
+            if ctx.language.startswith("ar")
+            else "(same as heading)"
+        )
         evidence_section = f"\nReference evidence:\n{evidence_block}\n" if evidence_block else ""
         user_prompt = get_book_prompt(prompts, "subsection_user").format(
             chapter_title=chapter_title,
@@ -321,6 +331,14 @@ def _fallback_outline(
         ]
         intro = f"本节围绕“{focus_topic}”展开。"
         takeaway = "记住核心定义，并能在例子中识别其应用。"
+    elif language.startswith("ar"):
+        roles = [
+            ("الفكرة الأساسية", "core"),
+            ("مثال محلول", "example"),
+            ("تطبيقات ومقارنات", "application"),
+        ]
+        intro = f"يفكك هذا القسم **{focus_topic}** في ثلاث خطوات."
+        takeaway = "تمسك بالتعريف، ثم تعرف على تطبيقه في الحالات العملية."
     else:
         roles = [
             ("Core idea", "core"),

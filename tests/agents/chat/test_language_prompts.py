@@ -22,6 +22,7 @@ def _fake_llm_config(monkeypatch: pytest.MonkeyPatch) -> None:
         lambda: cfg,
     )
     monkeypatch.setattr("deeptutor.agents.base_agent.get_llm_config", lambda: cfg)
+    monkeypatch.setattr("deeptutor.agents.base_agent.get_agent_params", lambda _module: {})
 
 
 def test_agentic_chat_final_prompt_uses_selected_language(
@@ -38,11 +39,14 @@ def test_agentic_chat_final_prompt_uses_selected_language(
 
     zh_prompt = AgenticChatPipeline(language="zh")._responding_system_prompt([])
     en_prompt = AgenticChatPipeline(language="en")._responding_system_prompt([])
+    ar_prompt = AgenticChatPipeline(language="ar")._responding_system_prompt([])
 
     assert "你是 DeepTutor 的最终回答阶段" in zh_prompt
     assert "请严格使用中文" in zh_prompt
     assert "You are DeepTutor's final response stage" in en_prompt
     assert "Write ALL reader-facing text" in en_prompt
+    assert "You are DeepTutor's final response stage" in ar_prompt
+    assert "اللغة العربية الفصحى" in ar_prompt
 
 
 def test_legacy_chat_agent_system_prompt_uses_selected_language() -> None:
@@ -54,8 +58,14 @@ def test_legacy_chat_agent_system_prompt_uses_selected_language() -> None:
         message="Explain gradient descent",
         history=[],
     )
+    ar_messages = ChatAgent(language="ar", config={}).build_messages(
+        message="اشرح الانحدار المتدرج",
+        history=[],
+    )
 
     assert "你是 DeepTutor" in zh_messages[0]["content"]
     assert "请严格使用中文" in zh_messages[0]["content"]
     assert "You are DeepTutor" in en_messages[0]["content"]
     assert "Write ALL reader-facing text" in en_messages[0]["content"]
+    assert "You are DeepTutor" in ar_messages[0]["content"]
+    assert "اللغة العربية الفصحى" in ar_messages[0]["content"]

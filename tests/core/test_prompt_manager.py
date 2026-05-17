@@ -176,6 +176,16 @@ class TestPromptManagerLanguages:
         prompts = pm.load_prompts("research", "research_agent", "invalid")
         assert isinstance(prompts, dict)
 
+    def test_arabic_prompts_fall_back_to_english_bundle(self):
+        """Arabic uses English prompt files plus strict language directives."""
+        pm = get_prompt_manager()
+        prompts = pm.load_prompts("solve", "solve_agent", "ar")
+        english_prompts = pm.load_prompts("solve", "solve_agent", "en")
+
+        assert isinstance(prompts, dict)
+        assert prompts == english_prompts
+        assert "solve_solve_agent_ar" in pm._cache
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

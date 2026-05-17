@@ -563,6 +563,11 @@ def _stream_text_kwargs() -> dict[str, object]:
 
 def _set_language(language: str) -> None:
     global _LANG
+    # The terminal wizard currently has English/Chinese copy. Arabic is still
+    # accepted here so the web UI can launch directly in Arabic after setup.
+    if str(language).strip().lower().startswith("ar"):
+        _LANG = "en"
+        return
     _LANG = "zh" if str(language).strip().lower().startswith("zh") else "en"
 
 
@@ -586,7 +591,13 @@ def _save_ui_language(language: str, path: Path = INTERFACE_SETTINGS_PATH) -> No
             payload.update(json.loads(path.read_text(encoding="utf-8")) or {})
         except Exception:
             pass
-    payload["language"] = "zh" if language == "zh" else "en"
+    normalized = str(language or "en").strip().lower()
+    if normalized.startswith("zh") or normalized in {"cn", "chinese"}:
+        payload["language"] = "zh"
+    elif normalized.startswith("ar") or normalized in {"ara", "arabic", "العربية"}:
+        payload["language"] = "ar"
+    else:
+        payload["language"] = "en"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -1112,6 +1123,7 @@ def _choose_language() -> str:
         [
             ("en", "English", "Run the setup wizard in English"),
             ("zh", "中文", "使用中文完成配置"),
+            ("ar", "العربية", "Use Arabic in the web interface after setup"),
         ],
     )
     _set_language(language)

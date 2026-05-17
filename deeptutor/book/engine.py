@@ -415,28 +415,37 @@ class BookEngine:
         if already:
             return spine
 
-        overview_title = "本书导览" if book.language == "zh" else "How to read this book"
-        objectives = (
-            [
+        if book.language == "zh":
+            overview_title = "本书导览"
+            objectives = [
                 "了解整本书的章节脉络",
                 "掌握各章之间的概念依赖关系",
                 "选择最合适的阅读顺序",
             ]
-            if book.language == "zh"
-            else [
+        elif str(book.language).startswith("ar"):
+            overview_title = "كيفية قراءة هذا الكتاب"
+            objectives = [
+                "رؤية خريطة الفصول كاملة في لمحة واحدة",
+                "فهم كيفية اعتماد المفاهيم بعضها على بعض",
+                "اختيار مسار القراءة الأنسب لأهدافك",
+            ]
+        else:
+            overview_title = "How to read this book"
+            objectives = [
                 "See the full chapter map at a glance",
                 "Understand how concepts depend on each other",
                 "Pick the reading path that fits your goals",
             ]
-        )
         overview = Chapter(
             title=overview_title,
             learning_objectives=objectives,
             content_type=ContentType.OVERVIEW,
             summary=(
-                "Auto-generated overview of the book's concept graph and chapter index."
-                if book.language != "zh"
-                else "自动生成的概念图与章节索引，作为本书的入口。"
+                "自动生成的概念图与章节索引，作为本书的入口。"
+                if book.language == "zh"
+                else "نظرة عامة مولدة تلقائيا لخريطة مفاهيم الكتاب وفهرس فصوله."
+                if str(book.language).startswith("ar")
+                else "Auto-generated overview of the book's concept graph and chapter index."
             ),
             order=0,
         )

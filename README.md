@@ -26,6 +26,8 @@
 
 > 🤝 **We welcome any kinds of contributing!** See our [Contributing Guide](CONTRIBUTING.md) for branching strategy, coding standards, and how to get started.
 
+> Arabic-enabled fork users: see [DeepTutor Setup and Arabic Language Guide](README_ARABIC_SETUP.md).
+
 ### 📦 Releases
 
 > **[2026.5.10]** [v1.3.10](https://github.com/HKUDS/DeepTutor/releases/tag/v1.3.10) — Remote Docker CORS recovery, `DISABLE_SSL_VERIFY` across SDK providers, safer code-block citations, and optional Matrix E2EE add-on.
